@@ -31,17 +31,17 @@ spec:
       memory: 512Mi
   ingresses:
     - "https://simtest.intern.dev.nav.no"
-#  azure:
-#    application:
-#      enabled: true
-#      allowAllUsers: true
-#      tenant: trygdeetaten.no
-#      claims:
-#        extra:
-#          - azp_name
-#          - NAVident
-#    sidecar:
-#      enabled: false
+  azure:
+    application:
+      enabled: true
+      allowAllUsers: true
+      tenant: trygdeetaten.no
+      claims:
+        extra:
+          - azp_name
+          - NAVident
+    sidecar:
+      enabled: true
 #  accessPolicy:
 #    inbound:
 #      rules:

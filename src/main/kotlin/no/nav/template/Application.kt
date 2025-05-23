@@ -5,8 +5,10 @@ import org.http4k.core.HttpHandler
 import org.http4k.core.Method
 import org.http4k.core.Response
 import org.http4k.core.Status.Companion.OK
+import org.http4k.routing.ResourceLoader
 import org.http4k.routing.bind
 import org.http4k.routing.routes
+import org.http4k.routing.static
 import org.http4k.server.ApacheServer
 import org.http4k.server.Http4kServer
 import org.http4k.server.asServer
@@ -22,7 +24,8 @@ object Application {
         "/internal/isAlive" bind Method.GET to { Response(OK) },
         "/internal/isReady" bind Method.GET to { Response(OK) },
         "/internal/metrics" bind Method.GET to Metrics.metricsHttpHandler,
-        "/internal/hello" bind Method.GET to { Response(OK).body("Hello") }
+        "/internal/hello" bind Method.GET to { Response(OK).body("Hello") },
+        "/internal/gui" bind static(ResourceLoader.Classpath("/gui")),
     )
 
     fun start() {
