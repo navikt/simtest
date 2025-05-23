@@ -22,6 +22,7 @@ object Application {
         "/internal/isAlive" bind Method.GET to { Response(OK) },
         "/internal/isReady" bind Method.GET to { Response(OK) },
         "/internal/metrics" bind Method.GET to Metrics.metricsHttpHandler,
+        "/internal/hello" bind Method.GET to { Response(OK).body("Hello")}
     )
 
     fun start() {
