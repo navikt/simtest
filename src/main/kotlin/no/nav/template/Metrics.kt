@@ -18,7 +18,7 @@ object Metrics {
 
     val cRegistry: CollectorRegistry = CollectorRegistry.defaultRegistry
 
-    // val apiCalls: Gauge = registerLabelGauge("api_calls", "target_app", "path")
+    val apiCalls: Counter = registerLabelCounter("api_calls", "ingress")
 
     fun registerForwardedCallHistogram(name: String): Histogram {
         return Histogram.build().name(name).help(name)

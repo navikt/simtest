@@ -3,11 +3,8 @@ window.onload = function() {
 };
 
 const checkAuthorization = async () => {
-    const response = await fetch('/internal/view?page=1', {
-        method: 'GET',
-        headers: {
-            'Content-Type': 'application/json'
-        }
+    const response = await fetch('/internal/secrethello', {
+        method: 'GET'
     });
 
     if (response.status === 401) {

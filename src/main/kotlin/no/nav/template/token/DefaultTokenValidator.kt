@@ -8,11 +8,12 @@ import no.nav.security.token.support.core.validation.JwtTokenValidationHandler
 import no.nav.template.env
 import no.nav.template.env_AZURE_APP_CLIENT_ID
 import no.nav.template.env_AZURE_APP_WELL_KNOWN_URL
+import no.nav.template.token.TokenValidator
 import org.http4k.core.Request
 import java.net.URL
 import java.util.Optional
 
-object TokenValidation {
+class DefaultTokenValidator : TokenValidator {
     private val jwtTokenValidationHandler = JwtTokenValidationHandler(
         MultiIssuerConfiguration(
             mapOf(
@@ -24,7 +25,7 @@ object TokenValidation {
         )
     )
 
-    fun firstValidToken(request: Request): Optional<JwtToken> =
+    override fun firstValidToken(request: Request): Optional<JwtToken> =
         jwtTokenValidationHandler.getValidatedTokens(request.toNavRequest()).firstValidToken
 
     private fun Request.toNavRequest(): HttpRequest {

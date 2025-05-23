@@ -1,3 +1,5 @@
 package no.nav.template
 
-fun main() = Application.start()
+val application = Application()
+
+fun main() = application.start()
