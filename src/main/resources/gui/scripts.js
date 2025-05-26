@@ -15,7 +15,7 @@ const checkAuthorization = async () => {
     }
 
     document.getElementById('authorization-message').innerHTML =
-        'Authorized <button id="login-button" onclick="login()">Token fetch</button>';
+        'Authorized <button id="login-button" onclick="tokenfetch()">Token fetch</button>';
 
 };
 
