@@ -32,6 +32,7 @@ class Application(
         "/internal/metrics" bind Method.GET to Metrics.metricsHttpHandler,
         "/internal/hello" bind Method.GET to { Response(OK).body("Hello") },
         "/internal/secrethello" authbind Method.GET to { Response(OK).body("Secret Hello") },
+        "/internal/tokenexchange" authbind Method.GET to { Response(OK).body("Result will come") },
         "/internal/gui" bind static(ResourceLoader.Classpath("/gui")),
     )
 
