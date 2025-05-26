@@ -2,6 +2,7 @@ package no.nav.template
 
 import mu.KotlinLogging
 import no.nav.saas.proxy.token.DefaultTokenValidator
+import no.nav.template.token.TokenExchangeHandler
 import org.http4k.core.HttpHandler
 import org.http4k.core.Method
 import org.http4k.core.Response
@@ -32,7 +33,10 @@ class Application(
         "/internal/metrics" bind Method.GET to Metrics.metricsHttpHandler,
         "/internal/hello" bind Method.GET to { Response(OK).body("Hello") },
         "/internal/secrethello" authbind Method.GET to { Response(OK).body("Secret Hello") },
-        "/internal/tokenexchange" authbind Method.GET to { Response(OK).body("Result will come") },
+        "/internal/tokenexchange" authbind Method.GET to {
+            val token = tokenValidator.firstValidToken(it).get()
+            Response(OK).body("Result: " + TokenExchangeHandler.exchange(token, "dev-gcp:teamnks:sf-henvendelse-api-proxy"))
+        },
         "/internal/gui" bind static(ResourceLoader.Classpath("/gui")),
     )
 
