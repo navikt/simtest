@@ -66,7 +66,7 @@ object TokenExchangeHandler {
     fun isOBOToken(jwt: JwtToken) = jwt.jwtTokenClaims.get("NAVident") != null
 
     // target alias example: cluster.namespace.app
-    fun exchange(jwtIn: JwtToken, targetAlias: String, scope: String = "defaultaccess"): JwtToken {
+    fun exchange(jwtIn: JwtToken, targetAlias: String, scope: String = ".default"): JwtToken {
         if (!isOBOToken(jwtIn)) return acquireServiceToken(targetAlias, scope)
         val key = targetAlias + jwtIn.tokenAsString
 
