@@ -35,7 +35,9 @@ class Application(
         "/internal/secrethello" authbind Method.GET to { Response(OK).body("Secret Hello") },
         "/internal/tokenexchange" authbind Method.GET to {
             val token = tokenValidator.firstValidToken(it).get()
-            Response(OK).body("Result: " + TokenExchangeHandler.exchange(token, "dev-gcp:teamnks:sf-henvendelse-api-proxy"))
+            // 77322f36-6268-422e-a591-4616212cca1e
+            Response(OK).body("Result: " + TokenExchangeHandler.exchange(token, "77322f36-6268-422e-a591-4616212cca1e"))
+            // Response(OK).body("Result: " + TokenExchangeHandler.exchange(token, "dev-gcp:teamnks:sf-henvendelse-api-proxy"))
         },
         "/internal/gui" bind static(ResourceLoader.Classpath("/gui")),
     )

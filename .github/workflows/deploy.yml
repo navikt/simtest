@@ -48,7 +48,7 @@ jobs:
           identity_provider: ${{ secrets.NAIS_WORKLOAD_IDENTITY_PROVIDER }}
           project_id: ${{ vars.NAIS_MANAGEMENT_PROJECT_ID }}
   deploy-dev:
-    name: Deploy sf-nada-crm to dev-gcp
+    name: Deploy simtest to dev-gcp
     needs: build
     runs-on: ubuntu-latest
     permissions:
