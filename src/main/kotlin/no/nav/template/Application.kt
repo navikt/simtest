@@ -84,7 +84,7 @@ class Application(
         val client: HttpHandler = OkHttp()
 
         val uri = Uri.of("https://sf-henvendelse.intern.dev.nav.no/api/henvendelseinfo/henvendelseliste")
-            .query("aktorid", "1000096233942") // .query("cache", "true")
+            .query("aktorid", "1000096233942").query("cache", "true")
 
         val request = Request(Method.GET, uri)
             .header("X-Correlation-ID", "df3d62db9b0e4cbc94c2243895f6d111")
@@ -108,7 +108,7 @@ class Application(
         val client: HttpHandler = ApacheClient()
 
         val uri = Uri.of("https://sf-henvendelse.intern.dev.nav.no/api/henvendelseinfo/henvendelseliste")
-            .query("aktorid", "1000096233942") // .query("cache", "true")
+            .query("aktorid", "1000096233942").query("cache", "true")
 
         val request = Request(Method.GET, uri)
             .header("X-Correlation-ID", "df3d62db9b0e4cbc94c2243895f6d111")
