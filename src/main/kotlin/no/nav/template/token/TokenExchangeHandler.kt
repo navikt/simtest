@@ -158,7 +158,7 @@ object TokenExchangeHandler {
             File("/tmp/failedExtractAccessToken-$alias-$tokenType").writeText(
                 "$currentDateTime\n\nREQUEST:\n" + request.toMessage() + "\n\nRESPONSE:\n" + this.toMessage()
             )
-            log.error { "Failed to fetch $tokenType access token for $alias - ${this.bodyString()}" }
+            log.error { "Failed to fetch $tokenType access token for $alias - ${this.bodyString()} " }
             throw AuthenticationException("Failed to fetch $tokenType access token for $alias - ${this.bodyString()}")
         }
     }

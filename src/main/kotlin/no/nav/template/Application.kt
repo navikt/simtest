@@ -2,12 +2,17 @@ package no.nav.template
 
 import mu.KotlinLogging
 import no.nav.saas.proxy.token.DefaultTokenValidator
+import no.nav.security.token.support.core.jwt.JwtToken
 import no.nav.template.token.TokenExchangeHandler
+import org.http4k.client.OkHttp
 import org.http4k.core.HttpHandler
 import org.http4k.core.Method
+import org.http4k.core.Request
 import org.http4k.core.Response
 import org.http4k.core.Status
 import org.http4k.core.Status.Companion.OK
+import org.http4k.core.Uri
+import org.http4k.core.query
 import org.http4k.routing.PathMethod
 import org.http4k.routing.ResourceLoader
 import org.http4k.routing.RoutingHttpHandler
@@ -35,8 +40,8 @@ class Application(
         "/internal/secrethello" authbind Method.GET to { Response(OK).body("Secret Hello") },
         "/internal/tokenexchange" authbind Method.GET to {
             val token = tokenValidator.firstValidToken(it).get()
-            Response(OK).body("Result: " + TokenExchangeHandler.exchange(token, "77322f36-6268-422e-a591-4616212cca1e").tokenAsString)
-            // Response(OK).body("Result: " + TokenExchangeHandler.exchange(token, "dev-gcp:teamnks:sf-henvendelse-api-proxy"))
+            val exchangedToken = TokenExchangeHandler.exchange(token, "77322f36-6268-422e-a591-4616212cca1e")
+            Response(OK).body("Result: " + callAsModia(exchangedToken))
         },
         "/internal/gui" bind static(ResourceLoader.Classpath("/gui")),
     )
@@ -66,5 +71,27 @@ class Application(
     fun start() {
         log.info { "Starting in cluster $cluster" }
         apiServer(8080).start()
+    }
+
+    fun callAsModia(token: JwtToken): String {
+        val client: HttpHandler = OkHttp()
+
+        val uri = Uri.of("https://sf-henvendelse.intern.dev.nav.no/api/henvendelseinfo/henvendelseliste")
+            .query("aktorid", "1000096233942").query("cache", "true")
+
+        val request = Request(Method.GET, uri)
+            .header("X-Correlation-ID", "df3d62db9b0e4cbc94c2243895f6d111")
+            .header("Content-Type", "application/json")
+            .header("Accept", "application/json")
+            .header("Nav-Call-Id", "df3d62db9b0e4cbc94c2243895f6d111")
+            .header("Nav-Consumer-Id", "modiabrukerdialog")
+            .header("Authorization", "Bearer ${token.tokenAsString}")
+            .header("Connection", "Keep-Alive")
+            .header("Accept-Encoding", "gzip")
+        // .header("User-Agent", "okhttp/4.12.0") // Manually replicate the UA
+        // .header("traceparent", "00-f9469af424547e8943e13ef3bf3ce373-80b748275162777d-01")
+
+        val response = client(request)
+        return response.toMessage()
     }
 }
