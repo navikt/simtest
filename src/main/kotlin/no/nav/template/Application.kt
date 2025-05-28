@@ -23,6 +23,7 @@ import org.http4k.routing.static
 import org.http4k.server.ApacheServer
 import org.http4k.server.Http4kServer
 import org.http4k.server.asServer
+import java.io.File
 
 class Application(
     private val tokenValidator: DefaultTokenValidator = DefaultTokenValidator()
@@ -97,7 +98,9 @@ class Application(
         // .header("User-Agent", "okhttp/4.12.0") // Manually replicate the UA
         // .header("traceparent", "00-f9469af424547e8943e13ef3bf3ce373-80b748275162777d-01")
 
+        File("/tmp/callModia").writeText(request.toMessage())
         val response = client(request)
+        File("/tmp/responseModia").writeText(response.toMessage())
         return response.toMessage()
     }
 
@@ -109,17 +112,12 @@ class Application(
 
         val request = Request(Method.GET, uri)
             .header("X-Correlation-ID", "df3d62db9b0e4cbc94c2243895f6d111")
-            .header("Content-Type", "application/json")
-            .header("Accept", "application/json")
-            .header("Nav-Call-Id", "df3d62db9b0e4cbc94c2243895f6d111")
-            .header("Nav-Consumer-Id", "modiabrukerdialog")
             .header("Authorization", "Bearer ${token.tokenAsString}")
-            .header("Connection", "Keep-Alive")
-            .header("Accept-Encoding", "gzip")
         // .header("User-Agent", "okhttp/4.12.0") // Manually replicate the UA
         // .header("traceparent", "00-f9469af424547e8943e13ef3bf3ce373-80b748275162777d-01")
-
+        File("/tmp/callApache").writeText(request.toMessage())
         val response = client(request)
+        File("/tmp/responseApache").writeText(response.toMessage())
         return response.toMessage()
     }
 }
