@@ -76,8 +76,6 @@ class Application(
     fun callAsModia(token: JwtToken): String {
         val client: HttpHandler = OkHttp()
 
-
-
         val uri = Uri.of("https://sf-henvendelse.intern.dev.nav.no/api/henvendelseinfo/henvendelseliste")
             .query("aktorid", "1000096233942") // .query("cache", "true")
 
