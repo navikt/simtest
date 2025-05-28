@@ -101,7 +101,7 @@ class Application(
         File("/tmp/callModia").writeText(request.toMessage())
         val response = client(request)
         File("/tmp/responseModia").writeText(response.toMessage())
-        return response.toMessage()
+        return response.toMessage().replace("\n", "<br>")
     }
 
     fun callApache(token: JwtToken): String {
@@ -118,6 +118,6 @@ class Application(
         File("/tmp/callApache").writeText(request.toMessage())
         val response = client(request)
         File("/tmp/responseApache").writeText(response.toMessage())
-        return response.toMessage()
+        return response.toMessage().replace("\n", "<br>")
     }
 }
