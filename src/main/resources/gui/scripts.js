@@ -10,12 +10,12 @@ const checkAuthorization = async () => {
     if (response.status === 401) {
         // Unauthorized
         document.getElementById('authorization-message').innerHTML =
-            'Unauthorized <button id="login-button" onclick="login()">Login</button>';
+            'Unauthorized <button class="login-button" onclick="login()">Login</button>';
         return;
     }
 
     document.getElementById('authorization-message').innerHTML =
-        'Authorized <button id="login-button" onclick="tokenfetch()">Token fetch</button>';
+        'Authorized <button class="login-button" onclick="tokenfetch()">Token fetch</button><button class="login-button" onclick="tokenfetch2()">Token fetch 2</button>';
 
 };
 
@@ -27,6 +27,24 @@ const tokenfetch = async () => {
     document.getElementById('authorization-message').innerHTML = 'Processing...';
     try {
         const response = await fetch('/internal/tokenexchange', {
+            method: 'GET'
+        });
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const text = await response.text();  // Read response body as text
+        document.getElementById('authorization-message').innerHTML = text;
+    } catch (error) {
+        document.getElementById('authorization-message').innerHTML = `Error: ${error.message}`;
+    }
+}
+
+const tokenfetch2 = async () => {
+    document.getElementById('authorization-message').innerHTML = 'Processing...';
+    try {
+        const response = await fetch('/internal/tokenexchange2', {
             method: 'GET'
         });
 
