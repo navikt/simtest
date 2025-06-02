@@ -23,7 +23,6 @@ import java.lang.Exception
 import javax.naming.AuthenticationException
 
 object TokenExchangeHandler {
-
     /**
      * A handler for azure on-behalf-of exchange flow.
      * @see [v2_oauth2_on_behalf_of_flow](https://learn.microsoft.com/en-us/azure/active-directory/develop/v2-oauth2-on-behalf-of-flow)
@@ -44,45 +43,52 @@ object TokenExchangeHandler {
 
     private val azureTokenEndPoint: String = env(env_AZURE_OPENID_CONFIG_TOKEN_ENDPOINT)
 
-    private val azureConnectionManager = PoolingHttpClientConnectionManager().apply {
-        maxTotal = 10
-        defaultMaxPerRoute = 5
-    }
+    private val azureConnectionManager =
+        PoolingHttpClientConnectionManager().apply {
+            maxTotal = 10
+            defaultMaxPerRoute = 5
+        }
 
-    private val azureHttpClient: CloseableHttpClient = HttpClients.custom()
-        .setConnectionManager(azureConnectionManager)
-        .setDefaultRequestConfig(
-            RequestConfig.custom()
-                .setConnectTimeout(5000)
-                .setSocketTimeout(5000)
-                .setConnectionRequestTimeout(3000)
-                .setRedirectsEnabled(false)
-                .setCookieSpec(CookieSpecs.IGNORE_COOKIES)
-                .build()
-        ).build()
+    private val azureHttpClient: CloseableHttpClient =
+        HttpClients.custom()
+            .setConnectionManager(azureConnectionManager)
+            .setDefaultRequestConfig(
+                RequestConfig.custom()
+                    .setConnectTimeout(5000)
+                    .setSocketTimeout(5000)
+                    .setConnectionRequestTimeout(3000)
+                    .setRedirectsEnabled(false)
+                    .setCookieSpec(CookieSpecs.IGNORE_COOKIES)
+                    .build()
+            ).build()
 
     val clientAzure = ApacheClient(azureHttpClient)
 
     fun isOBOToken(jwt: JwtToken) = jwt.jwtTokenClaims.get("NAVident") != null
 
     // target alias example: cluster.namespace.app
-    fun exchange(jwtIn: JwtToken, targetAlias: String, scope: String = ".default"): JwtToken {
+    fun exchange(
+        jwtIn: JwtToken,
+        targetAlias: String,
+        scope: String = ".default"
+    ): JwtToken {
         if (!isOBOToken(jwtIn)) return acquireServiceToken(targetAlias, scope)
         val key = targetAlias + jwtIn.tokenAsString
 
         log.info { "Exchange obo token for $targetAlias" }
 
-        val req = Request(Method.POST, azureTokenEndPoint)
-            .header("Content-Type", "application/x-www-form-urlencoded")
-            .body(
-                listOf(
-                    "grant_type" to "urn:ietf:params:oauth:grant-type:jwt-bearer",
-                    "assertion" to jwtIn.tokenAsString,
-                    "client_id" to clientId,
-                    "scope" to "api://$targetAlias/$scope",
-                    "client_secret" to clientSecret,
-                    "requested_token_use" to "on_behalf_of",
-                    "claims" to """{
+        val req =
+            Request(Method.POST, azureTokenEndPoint)
+                .header("Content-Type", "application/x-www-form-urlencoded")
+                .body(
+                    listOf(
+                        "grant_type" to "urn:ietf:params:oauth:grant-type:jwt-bearer",
+                        "assertion" to jwtIn.tokenAsString,
+                        "client_id" to clientId,
+                        "scope" to "api://$targetAlias/$scope",
+                        "client_secret" to clientSecret,
+                        "requested_token_use" to "on_behalf_of",
+                        "claims" to """{
                         "access_token": {
                             "groups": {
                                 "essential": true
@@ -92,8 +98,8 @@ object TokenExchangeHandler {
                             }
                          }
                     }"""
-                ).toBody()
-            )
+                    ).toBody()
+                )
         val res = clientCallWithRetries(req)
 
         val jwtEncoded = res.extractAccessToken(targetAlias, "obo", req)
@@ -102,19 +108,23 @@ object TokenExchangeHandler {
         return jwt
     }
 
-    fun acquireServiceToken(targetAlias: String, scope: String): JwtToken {
+    fun acquireServiceToken(
+        targetAlias: String,
+        scope: String
+    ): JwtToken {
         log.info { "Acquiring service token for $targetAlias" }
         val m2mscope = if (scope == "defaultaccess") ".default" else scope
-        val req = Request(Method.POST, azureTokenEndPoint)
-            .header("Content-Type", "application/x-www-form-urlencoded")
-            .body(
-                listOf(
-                    "client_id" to clientId,
-                    "scope" to "api://$targetAlias/$m2mscope",
-                    "client_secret" to clientSecret,
-                    "grant_type" to "client_credentials"
-                ).toBody()
-            )
+        val req =
+            Request(Method.POST, azureTokenEndPoint)
+                .header("Content-Type", "application/x-www-form-urlencoded")
+                .body(
+                    listOf(
+                        "client_id" to clientId,
+                        "scope" to "api://$targetAlias/$m2mscope",
+                        "client_secret" to clientSecret,
+                        "grant_type" to "client_credentials"
+                    ).toBody()
+                )
 
         val res = clientCallWithRetries(req)
 
@@ -151,7 +161,11 @@ object TokenExchangeHandler {
         throw lastException ?: RuntimeException("Failed to execute action after $maxRetries attempts.")
     }
 
-    private fun Response.extractAccessToken(alias: String, tokenType: String, request: Request): String {
+    private fun Response.extractAccessToken(
+        alias: String,
+        tokenType: String,
+        request: Request
+    ): String {
         try {
             return JSONObject(this.bodyString()).get("access_token").toString()
         } catch (e: Exception) {

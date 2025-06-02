@@ -34,24 +34,25 @@ class Application(
 
     fun apiServer(port: Int): Http4kServer = api().asServer(ApacheServer(port))
 
-    fun api(): HttpHandler = routes(
-        "/internal/isAlive" bind Method.GET to { Response(OK) },
-        "/internal/isReady" bind Method.GET to { Response(OK) },
-        "/internal/metrics" bind Method.GET to Metrics.metricsHttpHandler,
-        "/internal/hello" bind Method.GET to { Response(OK).body("Hello") },
-        "/internal/secrethello" authbind Method.GET to { Response(OK).body("Secret Hello") },
-        "/internal/tokenexchange" authbind Method.GET to {
-            val token = tokenValidator.firstValidToken(it).get()
-            val exchangedToken = TokenExchangeHandler.exchange(token, "77322f36-6268-422e-a591-4616212cca1e")
-            Response(OK).body("Result: " + callAsModia(exchangedToken))
-        },
-        "/internal/tokenexchange2" authbind Method.GET to {
-            val token = tokenValidator.firstValidToken(it).get()
-            val exchangedToken = TokenExchangeHandler.exchange(token, "77322f36-6268-422e-a591-4616212cca1e")
-            Response(OK).body("Result: " + callApache(exchangedToken))
-        },
-        "/internal/gui" bind static(ResourceLoader.Classpath("/gui")),
-    )
+    fun api(): HttpHandler =
+        routes(
+            "/internal/isAlive" bind Method.GET to { Response(OK) },
+            "/internal/isReady" bind Method.GET to { Response(OK) },
+            "/internal/metrics" bind Method.GET to Metrics.metricsHttpHandler,
+            "/internal/hello" bind Method.GET to { Response(OK).body("Hello") },
+            "/internal/secrethello" authbind Method.GET to { Response(OK).body("Secret Hello") },
+            "/internal/tokenexchange" authbind Method.GET to {
+                val token = tokenValidator.firstValidToken(it).get()
+                val exchangedToken = TokenExchangeHandler.exchange(token, "77322f36-6268-422e-a591-4616212cca1e")
+                Response(OK).body("Result: " + callAsModia(exchangedToken))
+            },
+            "/internal/tokenexchange2" authbind Method.GET to {
+                val token = tokenValidator.firstValidToken(it).get()
+                val exchangedToken = TokenExchangeHandler.exchange(token, "77322f36-6268-422e-a591-4616212cca1e")
+                Response(OK).body("Result: " + callApache(exchangedToken))
+            },
+            "/internal/gui" bind static(ResourceLoader.Classpath("/gui"))
+        )
 
     /**
      * authbind: a variant of bind that takes care of authentication with use of tokenValidator
@@ -83,18 +84,20 @@ class Application(
     fun callAsModia(token: JwtToken): String {
         val client: HttpHandler = OkHttp()
 
-        val uri = Uri.of("https://sf-henvendelse.intern.dev.nav.no/api/henvendelseinfo/henvendelseliste")
-            .query("aktorid", "1000096233942").query("cache", "true")
+        val uri =
+            Uri.of("https://sf-henvendelse.intern.dev.nav.no/api/henvendelseinfo/henvendelseliste")
+                .query("aktorid", "1000096233942").query("cache", "true")
 
-        val request = Request(Method.GET, uri)
-            .header("X-Correlation-ID", "df3d62db9b0e4cbc94c2243895f6d111")
-            .header("Content-Type", "application/json")
-            .header("Accept", "application/json")
-            .header("Nav-Call-Id", "df3d62db9b0e4cbc94c2243895f6d111")
-            .header("Nav-Consumer-Id", "modiabrukerdialog")
-            .header("Authorization", "Bearer ${token.tokenAsString}")
-            .header("Connection", "Keep-Alive")
-            .header("Accept-Encoding", "gzip")
+        val request =
+            Request(Method.GET, uri)
+                .header("X-Correlation-ID", "df3d62db9b0e4cbc94c2243895f6d111")
+                .header("Content-Type", "application/json")
+                .header("Accept", "application/json")
+                .header("Nav-Call-Id", "df3d62db9b0e4cbc94c2243895f6d111")
+                .header("Nav-Consumer-Id", "modiabrukerdialog")
+                .header("Authorization", "Bearer ${token.tokenAsString}")
+                .header("Connection", "Keep-Alive")
+                .header("Accept-Encoding", "gzip")
         // .header("User-Agent", "okhttp/4.12.0") // Manually replicate the UA
         // .header("traceparent", "00-f9469af424547e8943e13ef3bf3ce373-80b748275162777d-01")
 
@@ -107,12 +110,14 @@ class Application(
     fun callApache(token: JwtToken): String {
         val client: HttpHandler = ApacheClient()
 
-        val uri = Uri.of("https://sf-henvendelse.intern.dev.nav.no/api/henvendelseinfo/henvendelseliste")
-            .query("aktorid", "1000096233942").query("cache", "true")
+        val uri =
+            Uri.of("https://sf-henvendelse.intern.dev.nav.no/api/henvendelseinfo/henvendelseliste")
+                .query("aktorid", "1000096233942").query("cache", "true")
 
-        val request = Request(Method.GET, uri)
-            .header("X-Correlation-ID", "df3d62db9b0e4cbc94c2243895f6d111")
-            .header("Authorization", "Bearer ${token.tokenAsString}")
+        val request =
+            Request(Method.GET, uri)
+                .header("X-Correlation-ID", "df3d62db9b0e4cbc94c2243895f6d111")
+                .header("Authorization", "Bearer ${token.tokenAsString}")
         // .header("User-Agent", "okhttp/4.12.0") // Manually replicate the UA
         // .header("traceparent", "00-f9469af424547e8943e13ef3bf3ce373-80b748275162777d-01")
         File("/tmp/callApache").writeText(request.toMessage())

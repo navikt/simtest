@@ -14,16 +14,18 @@ import java.net.URL
 import java.util.Optional
 
 class DefaultTokenValidator : TokenValidator {
-    private val jwtTokenValidationHandler = JwtTokenValidationHandler(
-        MultiIssuerConfiguration(
-            mapOf(
-                "azure" to IssuerProperties(
-                    URL(env(env_AZURE_APP_WELL_KNOWN_URL)),
-                    listOf(env(env_AZURE_APP_CLIENT_ID))
+    private val jwtTokenValidationHandler =
+        JwtTokenValidationHandler(
+            MultiIssuerConfiguration(
+                mapOf(
+                    "azure" to
+                        IssuerProperties(
+                            URL(env(env_AZURE_APP_WELL_KNOWN_URL)),
+                            listOf(env(env_AZURE_APP_CLIENT_ID))
+                        )
                 )
             )
         )
-    )
 
     override fun firstValidToken(request: Request): Optional<JwtToken> =
         jwtTokenValidationHandler.getValidatedTokens(request.toNavRequest()).firstValidToken
@@ -34,6 +36,7 @@ class DefaultTokenValidator : TokenValidator {
             override fun getHeader(headerName: String): String {
                 return req.header(headerName) ?: ""
             }
+
             override fun getCookies(): Array<HttpRequest.NameValue> {
                 return arrayOf()
             }

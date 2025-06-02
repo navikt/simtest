@@ -29,14 +29,17 @@ object Metrics {
 
     fun registerSummary(name: String) = Summary.build().name(name).help(name).register()
 
-    fun registerGauge(name: String) =
-        Gauge.build().name(name).help(name).register()
+    fun registerGauge(name: String) = Gauge.build().name(name).help(name).register()
 
-    fun registerLabelGauge(name: String, vararg labels: String) =
-        Gauge.build().name(name).help(name).labelNames(*labels).register()
+    fun registerLabelGauge(
+        name: String,
+        vararg labels: String
+    ) = Gauge.build().name(name).help(name).labelNames(*labels).register()
 
-    fun registerLabelCounter(name: String, vararg labels: String) =
-        Counter.build().name(name).help(name).labelNames(*labels).register()
+    fun registerLabelCounter(
+        name: String,
+        vararg labels: String
+    ) = Counter.build().name(name).help(name).labelNames(*labels).register()
 
     init {
         DefaultExports.initialize()
