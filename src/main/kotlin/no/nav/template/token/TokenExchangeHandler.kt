@@ -7,11 +7,12 @@ import no.nav.template.env
 import no.nav.template.env_AZURE_APP_CLIENT_ID
 import no.nav.template.env_AZURE_APP_CLIENT_SECRET
 import no.nav.template.env_AZURE_OPENID_CONFIG_TOKEN_ENDPOINT
-import org.apache.http.client.config.CookieSpecs
-import org.apache.http.client.config.RequestConfig
-import org.apache.http.impl.client.CloseableHttpClient
-import org.apache.http.impl.client.HttpClients
-import org.apache.http.impl.conn.PoolingHttpClientConnectionManager
+import org.apache.hc.client5.http.config.RequestConfig
+import org.apache.hc.client5.http.cookie.StandardCookieSpec
+import org.apache.hc.client5.http.impl.classic.CloseableHttpClient
+import org.apache.hc.client5.http.impl.classic.HttpClients
+import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManager
+import org.apache.hc.core5.util.Timeout
 import org.http4k.client.ApacheClient
 import org.http4k.core.Method
 import org.http4k.core.Request
@@ -43,24 +44,23 @@ object TokenExchangeHandler {
 
     private val azureTokenEndPoint: String = env(env_AZURE_OPENID_CONFIG_TOKEN_ENDPOINT)
 
-    private val azureConnectionManager =
-        PoolingHttpClientConnectionManager().apply {
-            maxTotal = 10
-            defaultMaxPerRoute = 5
-        }
+    // Create a connection manager
+    val azureConnectionManager = PoolingHttpClientConnectionManager().apply {
+        maxTotal = 10
+        defaultMaxPerRoute = 5
+    }
 
-    private val azureHttpClient: CloseableHttpClient =
-        HttpClients.custom()
-            .setConnectionManager(azureConnectionManager)
-            .setDefaultRequestConfig(
-                RequestConfig.custom()
-                    .setConnectTimeout(5000)
-                    .setSocketTimeout(5000)
-                    .setConnectionRequestTimeout(3000)
-                    .setRedirectsEnabled(false)
-                    .setCookieSpec(CookieSpecs.IGNORE_COOKIES)
-                    .build()
-            ).build()
+    private val requestConfig: RequestConfig = RequestConfig.custom()
+        .setResponseTimeout(Timeout.ofMilliseconds(5000))
+        .setConnectionRequestTimeout(Timeout.ofMilliseconds(3000))
+        .setRedirectsEnabled(false)
+        .setCookieSpec(StandardCookieSpec.IGNORE)
+        .build()
+
+    private val azureHttpClient: CloseableHttpClient = HttpClients.custom()
+        .setConnectionManager(azureConnectionManager)
+        .setDefaultRequestConfig(requestConfig)
+        .build()
 
     val clientAzure = ApacheClient(azureHttpClient)
 

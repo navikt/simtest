@@ -37,10 +37,10 @@ dependencies {
     implementation 'com.google.code.gson:gson:2.11.0'
 
 
-    implementation "org.http4k:http4k-core:3.251.0" //5.11.0.0
-    implementation "org.http4k:http4k-client-apache:3.251.0"
-    implementation "org.http4k:http4k-server-apache:3.251.0"
-    implementation "org.http4k:http4k-client-okhttp:3.251.0"
+    implementation "org.http4k:http4k-core:5.11.0.0"
+    implementation "org.http4k:http4k-client-apache:5.11.0.0"
+    implementation "org.http4k:http4k-server-apache:5.11.0.0"
+    implementation "org.http4k:http4k-client-okhttp:5.11.0.0"
 
     implementation "io.github.microutils:kotlin-logging:3.0.5"
     implementation "ch.qos.logback:logback-classic:1.5.18"
