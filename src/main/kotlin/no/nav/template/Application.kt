@@ -1,6 +1,7 @@
 package no.nav.template
 
 import mu.KotlinLogging
+import no.nav.saas.proxy.token.DefaultTokenValidator
 import no.nav.security.token.support.core.jwt.JwtToken
 import no.nav.template.token.MockTokenValidator
 import no.nav.template.token.TokenExchangeHandler
@@ -25,7 +26,7 @@ import org.http4k.server.asServer
 import java.io.File
 
 class Application(
-    private val tokenValidator: TokenValidator = MockTokenValidator() // DefaultTokenValidator()
+    private val tokenValidator: TokenValidator = DefaultTokenValidator()
 ) {
     private val log = KotlinLogging.logger { }
 
