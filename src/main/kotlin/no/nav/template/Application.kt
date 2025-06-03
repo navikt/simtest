@@ -1,9 +1,8 @@
 package no.nav.template
 
 import mu.KotlinLogging
-import no.nav.saas.proxy.token.DefaultTokenValidator
 import no.nav.security.token.support.core.jwt.JwtToken
-import no.nav.template.token.MockTokenValidator
+import no.nav.template.token.DefaultTokenValidator
 import no.nav.template.token.TokenExchangeHandler
 import no.nav.template.token.TokenValidator
 import org.http4k.client.OkHttp
@@ -42,12 +41,12 @@ class Application(
             "/internal/hello" bind Method.GET to { Response(OK).body("Hello") },
             "/internal/secrethello" authbind Method.GET to { Response(OK).body("Secret Hello") },
             "/internal/tokenexchange" authbind Method.GET to {
-                val token = tokenValidator.firstValidToken(it).get()
+                val token = tokenValidator.firstValidToken(it)!!
                 val exchangedToken = TokenExchangeHandler.exchange(token, "77322f36-6268-422e-a591-4616212cca1e")
                 Response(OK).body("Result: " + callAsModia(exchangedToken))
             },
             "/internal/tokenexchange2" authbind Method.GET to {
-                val token = tokenValidator.firstValidToken(it).get()
+                val token = tokenValidator.firstValidToken(it)!!
                 val exchangedToken = TokenExchangeHandler.exchange(token, "77322f36-6268-422e-a591-4616212cca1e")
                 Response(OK).body("Result: " + callAsModia(exchangedToken))
             },
@@ -68,7 +67,7 @@ class Application(
             PathMethod(path, method) to { request ->
                 Metrics.apiCalls.labels(path).inc()
                 val token = tokenValidator.firstValidToken(request)
-                if (token.isPresent) {
+                if (token != null) {
                     action(request)
                 } else {
                     Response(Status.UNAUTHORIZED)
@@ -99,7 +98,7 @@ class Application(
                 .header("Accept", "application/json")
                 .header("Nav-Call-Id", "df3d62db9b0e4cbc94c2243895f6d111")
                 .header("Nav-Consumer-Id", "modiabrukerdialog")
-                .header("Authorization", "Bearer ${token.tokenAsString}")
+                .header("Authorization", "Bearer ${token.encodedToken}")
                 .header("Connection", "Keep-Alive")
                 .header("Accept-Encoding", "gzip")
         // .header("User-Agent", "okhttp/4.12.0") // Manually replicate the UA

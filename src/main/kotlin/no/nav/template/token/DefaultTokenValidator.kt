@@ -1,4 +1,4 @@
-package no.nav.saas.proxy.token
+package no.nav.template.token
 
 import no.nav.security.token.support.core.configuration.IssuerProperties
 import no.nav.security.token.support.core.configuration.MultiIssuerConfiguration
@@ -8,10 +8,8 @@ import no.nav.security.token.support.core.validation.JwtTokenValidationHandler
 import no.nav.template.env
 import no.nav.template.env_AZURE_APP_CLIENT_ID
 import no.nav.template.env_AZURE_APP_WELL_KNOWN_URL
-import no.nav.template.token.TokenValidator
 import org.http4k.core.Request
 import java.net.URL
-import java.util.Optional
 
 class DefaultTokenValidator : TokenValidator {
     private val jwtTokenValidationHandler =
@@ -27,7 +25,7 @@ class DefaultTokenValidator : TokenValidator {
             )
         )
 
-    override fun firstValidToken(request: Request): Optional<JwtToken> =
+    override fun firstValidToken(request: Request): JwtToken? =
         jwtTokenValidationHandler.getValidatedTokens(request.toNavRequest()).firstValidToken
 
     private fun Request.toNavRequest(): HttpRequest {
@@ -35,10 +33,6 @@ class DefaultTokenValidator : TokenValidator {
         return object : HttpRequest {
             override fun getHeader(headerName: String): String {
                 return req.header(headerName) ?: ""
-            }
-
-            override fun getCookies(): Array<HttpRequest.NameValue> {
-                return arrayOf()
             }
         }
     }

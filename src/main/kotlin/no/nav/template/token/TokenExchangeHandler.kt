@@ -62,7 +62,7 @@ object TokenExchangeHandler {
         scope: String = ".default"
     ): JwtToken {
         if (!isOBOToken(jwtIn)) return acquireServiceToken(targetAlias, scope)
-        val key = targetAlias + jwtIn.tokenAsString
+        val key = targetAlias + jwtIn.encodedToken
 
         log.info { "Exchange obo token for $targetAlias" }
 
@@ -72,7 +72,7 @@ object TokenExchangeHandler {
                 .body(
                     listOf(
                         "grant_type" to "urn:ietf:params:oauth:grant-type:jwt-bearer",
-                        "assertion" to jwtIn.tokenAsString,
+                        "assertion" to jwtIn.encodedToken,
                         "client_id" to clientId,
                         "scope" to "api://$targetAlias/$scope",
                         "client_secret" to clientSecret,
