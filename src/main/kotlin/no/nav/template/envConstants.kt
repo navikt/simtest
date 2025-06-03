@@ -10,4 +10,4 @@ const val env_NAIS_CLUSTER_NAME = "NAIS_CLUSTER_NAME"
 /**
  * Shortcut for fetching environment variables
  */
-fun env(name: String): String = System.getenv(name) ?: throw NullPointerException("Missing env $name")
+fun env(name: String): String = System.getenv(name) ?: "" // throw NullPointerException("Missing env $name")
