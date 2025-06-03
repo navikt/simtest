@@ -78,6 +78,7 @@ class Application(
     fun start() {
         try {
             log.info { "Starting in cluster $cluster" }
+            File("/tmp/hello").writeText("I am in distroless test")
             apiServer(8080).start()
         } catch (e: Exception) {
             log.error(e) { "Failed to start server: " + e.printStackTrace() }
