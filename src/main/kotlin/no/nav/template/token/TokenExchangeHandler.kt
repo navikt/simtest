@@ -7,13 +7,9 @@ import no.nav.template.env
 import no.nav.template.env_AZURE_APP_CLIENT_ID
 import no.nav.template.env_AZURE_APP_CLIENT_SECRET
 import no.nav.template.env_AZURE_OPENID_CONFIG_TOKEN_ENDPOINT
-import org.apache.hc.client5.http.config.RequestConfig
-import org.apache.hc.client5.http.cookie.StandardCookieSpec
-import org.apache.hc.client5.http.impl.classic.CloseableHttpClient
-import org.apache.hc.client5.http.impl.classic.HttpClients
-import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManager
-import org.apache.hc.core5.util.Timeout
-import org.http4k.client.ApacheClient
+import okhttp3.OkHttpClient
+import org.http4k.client.OkHttp
+import org.http4k.core.HttpHandler
 import org.http4k.core.Method
 import org.http4k.core.Request
 import org.http4k.core.Response
@@ -21,6 +17,7 @@ import org.http4k.core.body.toBody
 import org.json.JSONObject
 import java.io.File
 import java.lang.Exception
+import java.util.concurrent.TimeUnit
 import javax.naming.AuthenticationException
 
 object TokenExchangeHandler {
@@ -44,25 +41,17 @@ object TokenExchangeHandler {
 
     private val azureTokenEndPoint: String = env(env_AZURE_OPENID_CONFIG_TOKEN_ENDPOINT)
 
-    // Create a connection manager
-    val azureConnectionManager = PoolingHttpClientConnectionManager().apply {
-        maxTotal = 10
-        defaultMaxPerRoute = 5
-    }
-
-    private val requestConfig: RequestConfig = RequestConfig.custom()
-        .setResponseTimeout(Timeout.ofMilliseconds(5000))
-        .setConnectionRequestTimeout(Timeout.ofMilliseconds(3000))
-        .setRedirectsEnabled(false)
-        .setCookieSpec(StandardCookieSpec.IGNORE)
+    // Create and configure the underlying OkHttpClient
+    val rawOkHttpClient = OkHttpClient.Builder()
+        .connectTimeout(5, TimeUnit.SECONDS)
+        .readTimeout(5, TimeUnit.SECONDS)
+        .writeTimeout(5, TimeUnit.SECONDS)
+        .callTimeout(10, TimeUnit.SECONDS)
+        .retryOnConnectionFailure(false)
         .build()
 
-    private val azureHttpClient: CloseableHttpClient = HttpClients.custom()
-        .setConnectionManager(azureConnectionManager)
-        .setDefaultRequestConfig(requestConfig)
-        .build()
-
-    val clientAzure = ApacheClient(azureHttpClient)
+    // Wrap with http4k HttpHandler
+    val client: HttpHandler = OkHttp(rawOkHttpClient)
 
     fun isOBOToken(jwt: JwtToken) = jwt.jwtTokenClaims.get("NAVident") != null
 
@@ -145,7 +134,7 @@ object TokenExchangeHandler {
         while (attempt < maxRetries) {
             try {
                 attempt++
-                val response = clientAzure(request)
+                val response = client(request)
                 if (response.status.code == 504) {
                     log.warn { "Time out on attempt $attempt. Retrying..." }
                 } else {

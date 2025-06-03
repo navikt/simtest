@@ -26,21 +26,21 @@ application {
 
 repositories {
     mavenCentral()
-    jcenter()
+    // jcenter()
 }
 
 dependencies {
+    //implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:2.1.21"  // Explicit Kotlin stdlib
+
     implementation "no.nav.security:token-validation-core:3.0.0"
 
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.8.1"
 
     implementation 'com.google.code.gson:gson:2.11.0'
 
-
-    implementation "org.http4k:http4k-core:5.11.0.0"
-    implementation "org.http4k:http4k-client-apache:5.11.0.0"
-    implementation "org.http4k:http4k-server-apache:5.11.0.0"
-    implementation "org.http4k:http4k-client-okhttp:5.11.0.0"
+    implementation "org.http4k:http4k-core:5.10.1.0"
+    implementation "org.http4k:http4k-server-netty:5.10.1.0"
+    implementation "org.http4k:http4k-client-okhttp:5.10.1.0"
 
     implementation "io.github.microutils:kotlin-logging:3.0.5"
     implementation "ch.qos.logback:logback-classic:1.5.18"
@@ -78,6 +78,8 @@ sourceSets {
 
 tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile) {
     kotlinOptions.jvmTarget = "17"
+    kotlinOptions.apiVersion = "2.1"
+    kotlinOptions.languageVersion = "2.1"
 }
 
 tasks.withType(JavaCompile) {

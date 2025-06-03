@@ -4,7 +4,6 @@ import mu.KotlinLogging
 import no.nav.saas.proxy.token.DefaultTokenValidator
 import no.nav.security.token.support.core.jwt.JwtToken
 import no.nav.template.token.TokenExchangeHandler
-import org.http4k.client.ApacheClient
 import org.http4k.client.OkHttp
 import org.http4k.core.HttpHandler
 import org.http4k.core.Method
@@ -13,15 +12,14 @@ import org.http4k.core.Response
 import org.http4k.core.Status
 import org.http4k.core.Status.Companion.OK
 import org.http4k.core.Uri
-import org.http4k.core.query
 import org.http4k.routing.PathMethod
 import org.http4k.routing.ResourceLoader
 import org.http4k.routing.RoutingHttpHandler
 import org.http4k.routing.bind
 import org.http4k.routing.routes
 import org.http4k.routing.static
-import org.http4k.server.ApacheServer
 import org.http4k.server.Http4kServer
+import org.http4k.server.Netty
 import org.http4k.server.asServer
 import java.io.File
 
@@ -32,7 +30,7 @@ class Application(
 
     val cluster = env(env_NAIS_CLUSTER_NAME)
 
-    fun apiServer(port: Int): Http4kServer = api().asServer(ApacheServer(port))
+    fun apiServer(port: Int): Http4kServer = api().asServer(Netty(port))
 
     fun api(): HttpHandler =
         routes(
@@ -49,7 +47,7 @@ class Application(
             "/internal/tokenexchange2" authbind Method.GET to {
                 val token = tokenValidator.firstValidToken(it).get()
                 val exchangedToken = TokenExchangeHandler.exchange(token, "77322f36-6268-422e-a591-4616212cca1e")
-                Response(OK).body("Result: " + callApache(exchangedToken))
+                Response(OK).body("Result: " + callAsModia(exchangedToken))
             },
             "/internal/gui" bind static(ResourceLoader.Classpath("/gui"))
         )
@@ -85,8 +83,7 @@ class Application(
         val client: HttpHandler = OkHttp()
 
         val uri =
-            Uri.of("https://sf-henvendelse.intern.dev.nav.no/api/henvendelseinfo/henvendelseliste")
-                .query("aktorid", "1000096233942").query("cache", "true")
+            Uri.of("https://sf-henvendelse.intern.dev.nav.no/api/henvendelseinfo/henvendelseliste?aktorid=1000096233942&cache=true")
 
         val request =
             Request(Method.GET, uri)
@@ -104,25 +101,6 @@ class Application(
         File("/tmp/callModia").writeText(request.toMessage())
         val response = client(request)
         File("/tmp/responseModia").writeText(response.toMessage())
-        return response.toMessage().replace("\n", "<br>")
-    }
-
-    fun callApache(token: JwtToken): String {
-        val client: HttpHandler = ApacheClient()
-
-        val uri =
-            Uri.of("https://sf-henvendelse.intern.dev.nav.no/api/henvendelseinfo/henvendelseliste")
-                .query("aktorid", "1000096233942").query("cache", "true")
-
-        val request =
-            Request(Method.GET, uri)
-                .header("X-Correlation-ID", "df3d62db9b0e4cbc94c2243895f6d111")
-                .header("Authorization", "Bearer ${token.tokenAsString}")
-        // .header("User-Agent", "okhttp/4.12.0") // Manually replicate the UA
-        // .header("traceparent", "00-f9469af424547e8943e13ef3bf3ce373-80b748275162777d-01")
-        File("/tmp/callApache").writeText(request.toMessage())
-        val response = client(request)
-        File("/tmp/responseApache").writeText(response.toMessage())
         return response.toMessage().replace("\n", "<br>")
     }
 }
