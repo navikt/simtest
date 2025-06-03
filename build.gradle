@@ -30,18 +30,17 @@ repositories {
 }
 
 dependencies {
-    //implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:2.1.21"  // Explicit Kotlin stdlib
-
     implementation "no.nav.security:token-validation-core:5.0.29"
 
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.8.1"
 
     implementation 'com.google.code.gson:gson:2.11.0'
 
-    implementation "org.http4k:http4k-server-netty:5.47.0.0"
+    implementation "org.http4k:http4k-core:5.14.4.0"
+    implementation "org.http4k:http4k-server-netty:5.14.4.0"
     implementation "io.netty:netty-handler:4.1.118.Final" //4.1.117.Final has vulnerability
     implementation "io.netty:netty-common:4.1.118.Final" //4.1.117.Final has vulnerability
-    implementation "org.http4k:http4k-client-okhttp:5.47.0.0"
+    implementation "org.http4k:http4k-client-okhttp:5.14.4.0"
 
     implementation "io.github.microutils:kotlin-logging:3.0.5"
     implementation "ch.qos.logback:logback-classic:1.5.18"

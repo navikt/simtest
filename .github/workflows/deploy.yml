@@ -46,8 +46,6 @@ jobs:
         id: docker-push
         with:
           team: teamcrm # <- template: make sure this is correct namespace as well
-          identity_provider: ${{ secrets.NAIS_WORKLOAD_IDENTITY_PROVIDER }}
-          project_id: ${{ vars.NAIS_MANAGEMENT_PROJECT_ID }}
   deploy-dev:
     name: Deploy simtest to dev-gcp
     needs: build
