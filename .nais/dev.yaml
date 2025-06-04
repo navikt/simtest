@@ -46,6 +46,7 @@ spec:
     outbound:
       external:
         - host: sf-henvendelse.intern.dev.nav.no
+        - host: saas-proxy.intern.dev.nav.no
 #    inbound:
 #      rules:
 #        - application: salesforce

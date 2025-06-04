@@ -42,12 +42,12 @@ class Application(
             "/internal/secrethello" authbind Method.GET to { Response(OK).body("Secret Hello") },
             "/internal/tokenexchange" authbind Method.GET to {
                 val token = tokenValidator.firstValidToken(it)!!
-                val exchangedToken = TokenExchangeHandler.exchange(token, "77322f36-6268-422e-a591-4616212cca1e")
-                Response(OK).body("Result: " + callAsModia(exchangedToken))
+                val exchangedToken = TokenExchangeHandler.exchange(token, "f6e29bd3-8902-460f-8666-608a20fcf50f") // saas
+                Response(OK).body("Result: " + exchangedToken.encodedToken /*callAsModia(exchangedToken)*/)
             },
             "/internal/tokenexchange2" authbind Method.GET to {
                 val token = tokenValidator.firstValidToken(it)!!
-                val exchangedToken = TokenExchangeHandler.exchange(token, "77322f36-6268-422e-a591-4616212cca1e")
+                val exchangedToken = TokenExchangeHandler.exchange(token, "77322f36-6268-422e-a591-4616212cca1e") // henv prox
                 Response(OK).body("Result: " + callAsModia(exchangedToken))
             },
             "/internal/gui" bind static(ResourceLoader.Classpath("/gui"))
