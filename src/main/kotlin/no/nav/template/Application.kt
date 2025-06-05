@@ -79,6 +79,8 @@ class Application(
         try {
             log.info { "Starting in cluster $cluster" }
             File("/tmp/hello").writeText("I am in distroless test")
+            File("/tmp/hello2").writeText("I am in distroless test 2")
+            File("/tmp/hello3").writeText("I am in distroless test 3")
             apiServer(8080).start()
         } catch (e: Exception) {
             log.error(e) { "Failed to start server: " + e.printStackTrace() }
