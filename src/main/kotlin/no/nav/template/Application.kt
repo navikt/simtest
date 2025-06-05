@@ -47,8 +47,15 @@ class Application(
             },
             "/internal/tokenexchange2" authbind Method.GET to {
                 val token = tokenValidator.firstValidToken(it)!!
+                val exchangedToken = TokenExchangeHandler.exchange(token, "16d80b1a-261a-488a-a353-223baab6abb4") // saas 2
+                Response(OK).body("Result: " + exchangedToken.encodedToken /*callAsModia(exchangedToken)*/)
+
+                /*
+                val token = tokenValidator.firstValidToken(it)!!
                 val exchangedToken = TokenExchangeHandler.exchange(token, "77322f36-6268-422e-a591-4616212cca1e") // henv prox
                 Response(OK).body("Result: " + callAsModia(exchangedToken))
+
+                 */
             },
             "/internal/gui" bind static(ResourceLoader.Classpath("/gui"))
         )
