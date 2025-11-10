@@ -19,10 +19,10 @@ class DefaultTokenValidator : TokenValidator {
                     "azure" to
                         IssuerProperties(
                             URL(env(env_AZURE_APP_WELL_KNOWN_URL)),
-                            listOf(env(env_AZURE_APP_CLIENT_ID))
-                        )
-                )
-            )
+                            listOf(env(env_AZURE_APP_CLIENT_ID)),
+                        ),
+                ),
+            ),
         )
 
     override fun firstValidToken(request: Request): JwtToken? =
@@ -31,9 +31,7 @@ class DefaultTokenValidator : TokenValidator {
     private fun Request.toNavRequest(): HttpRequest {
         val req = this
         return object : HttpRequest {
-            override fun getHeader(headerName: String): String {
-                return req.header(headerName) ?: ""
-            }
+            override fun getHeader(headerName: String): String = req.header(headerName) ?: ""
         }
     }
 }

@@ -25,7 +25,7 @@ import org.http4k.server.asServer
 import java.io.File
 
 class Application(
-    private val tokenValidator: TokenValidator = DefaultTokenValidator()
+    private val tokenValidator: TokenValidator = DefaultTokenValidator(),
 ) {
     private val log = KotlinLogging.logger { }
 
@@ -42,13 +42,15 @@ class Application(
             "/internal/secrethello" authbind Method.GET to { Response(OK).body("Secret Hello") },
             "/internal/tokenexchange" authbind Method.GET to {
                 val token = tokenValidator.firstValidToken(it)!!
-                val exchangedToken = TokenExchangeHandler.exchange(token, "77322f36-6268-422e-a591-4616212cca1e") // proxy, saas f6e29bd3-8902-460f-8666-608a20fcf50f
-                Response(OK).body("Result: " + exchangedToken.encodedToken /*callAsModia(exchangedToken)*/)
+                // proxy, saas f6e29bd3-8902-460f-8666-608a20fcf50f
+                val exchangedToken = TokenExchangeHandler.exchange(token, "77322f36-6268-422e-a591-4616212cca1e")
+                Response(OK).body("Result: " + exchangedToken.encodedToken) // callAsModia(exchangedToken)
             },
             "/internal/tokenexchange2" authbind Method.GET to {
                 val token = tokenValidator.firstValidToken(it)!!
-                val exchangedToken = TokenExchangeHandler.exchange(token, "06e31845-228b-450c-994e-df55053a8761") // proxy2, saas 2 16d80b1a-261a-488a-a353-223baab6abb4
-                Response(OK).body("Result: " + exchangedToken.encodedToken /*callAsModia(exchangedToken)*/)
+                // proxy2, saas 2 16d80b1a-261a-488a-a353-223baab6abb4
+                val exchangedToken = TokenExchangeHandler.exchange(token, "06e31845-228b-450c-994e-df55053a8761")
+                Response(OK).body("Result: " + exchangedToken.encodedToken) // callAsModia(exchangedToken)
 
                 /*
                 val token = tokenValidator.firstValidToken(it)!!
@@ -57,7 +59,7 @@ class Application(
 
                  */
             },
-            "/internal/gui" bind static(ResourceLoader.Classpath("/gui"))
+            "/internal/gui" bind static(ResourceLoader.Classpath("/gui")),
         )
 
     /**
@@ -68,7 +70,7 @@ class Application(
     data class AuthRouteBuilder(
         val path: String,
         val method: Method,
-        private val tokenValidator: TokenValidator
+        private val tokenValidator: TokenValidator,
     ) {
         infix fun to(action: HttpHandler): RoutingHttpHandler =
             PathMethod(path, method) to { request ->

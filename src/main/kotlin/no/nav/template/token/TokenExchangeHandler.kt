@@ -27,12 +27,6 @@ object TokenExchangeHandler {
      *
      * Exchanges an azure on-behalf-of-token with audience to this app for one with audience to salesforce. Caches the result
      */
-    /**
-     * A handler for azure on-behalf-of exchange flow.
-     * @see [v2_oauth2_on_behalf_of_flow](https://learn.microsoft.com/en-us/azure/active-directory/develop/v2-oauth2-on-behalf-of-flow)
-     *
-     * Exchanges an azure on-behalf-of-token with audience to this app for one with audience to salesforce. Caches the result
-     */
 
     private val log = KotlinLogging.logger { }
 
@@ -42,13 +36,15 @@ object TokenExchangeHandler {
     private val azureTokenEndPoint: String = env(env_AZURE_OPENID_CONFIG_TOKEN_ENDPOINT)
 
     // Create and configure the underlying OkHttpClient
-    val rawOkHttpClient = OkHttpClient.Builder()
-        .connectTimeout(5, TimeUnit.SECONDS)
-        .readTimeout(5, TimeUnit.SECONDS)
-        .writeTimeout(5, TimeUnit.SECONDS)
-        .callTimeout(10, TimeUnit.SECONDS)
-        .retryOnConnectionFailure(false)
-        .build()
+    val rawOkHttpClient =
+        OkHttpClient
+            .Builder()
+            .connectTimeout(5, TimeUnit.SECONDS)
+            .readTimeout(5, TimeUnit.SECONDS)
+            .writeTimeout(5, TimeUnit.SECONDS)
+            .callTimeout(10, TimeUnit.SECONDS)
+            .retryOnConnectionFailure(false)
+            .build()
 
     // Wrap with http4k HttpHandler
     val client: HttpHandler = OkHttp(rawOkHttpClient)
@@ -59,7 +55,7 @@ object TokenExchangeHandler {
     fun exchange(
         jwtIn: JwtToken,
         targetAlias: String,
-        scope: String = ".default"
+        scope: String = ".default",
     ): JwtToken {
         if (!isOBOToken(jwtIn)) return acquireServiceToken(targetAlias, scope)
         val key = targetAlias + jwtIn.encodedToken
@@ -86,8 +82,8 @@ object TokenExchangeHandler {
                                 "essential": true
                             }
                          }
-                    }"""
-                    ).toBody()
+                    }""",
+                    ).toBody(),
                 )
         val res = clientCallWithRetries(req)
 
@@ -99,7 +95,7 @@ object TokenExchangeHandler {
 
     fun acquireServiceToken(
         targetAlias: String,
-        scope: String
+        scope: String,
     ): JwtToken {
         log.info { "Acquiring service token for $targetAlias" }
         val m2mscope = if (scope == "defaultaccess") ".default" else scope
@@ -111,8 +107,8 @@ object TokenExchangeHandler {
                         "client_id" to clientId,
                         "scope" to "api://$targetAlias/$m2mscope",
                         "client_secret" to clientSecret,
-                        "grant_type" to "client_credentials"
-                    ).toBody()
+                        "grant_type" to "client_credentials",
+                    ).toBody(),
                 )
 
         val res = clientCallWithRetries(req)
@@ -126,7 +122,7 @@ object TokenExchangeHandler {
     fun clientCallWithRetries(
         request: Request,
         maxRetries: Int = 3,
-        delayMillis: Long = 100
+        delayMillis: Long = 100,
     ): Response {
         var attempt = 0
         var lastException: Exception? = null
@@ -153,13 +149,13 @@ object TokenExchangeHandler {
     private fun Response.extractAccessToken(
         alias: String,
         tokenType: String,
-        request: Request
+        request: Request,
     ): String {
         try {
             return JSONObject(this.bodyString()).get("access_token").toString()
         } catch (e: Exception) {
             File("/tmp/failedExtractAccessToken-$alias-$tokenType").writeText(
-                "$currentDateTime\n\nREQUEST:\n" + request.toMessage() + "\n\nRESPONSE:\n" + this.toMessage()
+                "$currentDateTime\n\nREQUEST:\n" + request.toMessage() + "\n\nRESPONSE:\n" + this.toMessage(),
             )
             log.error { "Failed to fetch $tokenType access token for $alias - ${this.bodyString()} " }
             throw AuthenticationException("Failed to fetch $tokenType access token for $alias - ${this.bodyString()}")
