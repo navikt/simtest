@@ -45,7 +45,7 @@ jobs:
         uses: nais/docker-build-push@v0
         id: docker-push
         with:
-          team: teamcrm
+          team: platforce
   deploy-dev:
     name: Deploy simtest to dev-gcp
     needs: build
