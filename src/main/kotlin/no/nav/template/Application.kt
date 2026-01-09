@@ -44,7 +44,7 @@ class Application(
                 val token = tokenValidator.firstValidToken(it)!!
                 // proxy, saas f6e29bd3-8902-460f-8666-608a20fcf50f
                 val exchangedToken = TokenExchangeHandler.exchange(token, "77322f36-6268-422e-a591-4616212cca1e")
-                Response(OK).body("Result: " + exchangedToken.encodedToken) // callAsModia(exchangedToken)
+                Response(OK).body("Result:  " + exchangedToken.encodedToken) // callAsModia(exchangedToken)
             },
             "/internal/tokenexchange2" authbind Method.GET to {
                 val token = tokenValidator.firstValidToken(it)!!
