@@ -50,7 +50,7 @@ class Application(
                 val token = tokenValidator.firstValidToken(it)!!
                 // proxy2, saas 2 16d80b1a-261a-488a-a353-223baab6abb4
                 val exchangedToken = TokenExchangeHandler.exchange(token, "06e31845-228b-450c-994e-df55053a8761")
-                Response(OK).body("Result:" + exchangedToken.encodedToken) // callAsModia(exchangedToken)
+                Response(OK).body("Result: " + exchangedToken.encodedToken) // callAsModia(exchangedToken)
 
                 /*
                 val token = tokenValidator.firstValidToken(it)!!
