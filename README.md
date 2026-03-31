@@ -1,4 +1,3 @@
-# sf-mellomvare-template
-Starting point for salesforce mellomvare
+# simtest
 
-Use IDE find all search for "template", to get an idea what needs to be replaced
+Simple app used for simulation tests
