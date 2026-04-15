@@ -40,6 +40,10 @@ class Application(
             "/internal/metrics" bind Method.GET to Metrics.metricsHttpHandler,
             "/internal/hello" bind Method.GET to { Response(OK).body("Hello!") },
             "/internal/secrethello" authbind Method.GET to { Response(OK).body("Secret Hello!") },
+            "/internal/token" authbind Method.GET to {
+                val token = tokenValidator.firstValidToken(it)!!
+                Response(OK).body(token.encodedToken)
+            },
             "/internal/tokenexchange" authbind Method.GET to {
                 val token = tokenValidator.firstValidToken(it)!!
                 // proxy, saas f6e29bd3-8902-460f-8666-608a20fcf50f
