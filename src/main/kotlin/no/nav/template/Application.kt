@@ -1,3 +1,5 @@
+@file:Suppress("ktlint:standard:property-naming")
+
 package no.nav.template
 
 import mu.KotlinLogging
@@ -22,6 +24,7 @@ import org.http4k.routing.static
 import org.http4k.server.Http4kServer
 import org.http4k.server.Netty
 import org.http4k.server.asServer
+import org.slf4j.MarkerFactory
 import java.io.File
 
 class Application(
@@ -31,6 +34,8 @@ class Application(
 
     val cluster = env(env_NAIS_CLUSTER_NAME)
 
+    private val TEAM_LOGS = MarkerFactory.getMarker("TEAM_LOGS")
+
     fun apiServer(port: Int): Http4kServer = api().asServer(Netty(port))
 
     fun api(): HttpHandler =
@@ -38,7 +43,11 @@ class Application(
             "/internal/isAlive" bind Method.GET to { Response(OK) },
             "/internal/isReady" bind Method.GET to { Response(OK) },
             "/internal/metrics" bind Method.GET to Metrics.metricsHttpHandler,
-            "/internal/hello" bind Method.GET to { Response(OK).body("Hello!") },
+            "/internal/hello" bind Method.GET to {
+                log.info("Hello in the logs")
+                log.info(TEAM_LOGS, "Hello in the logs, TEAM LOGS")
+                Response(OK).body("Hello!")
+            },
             "/internal/secrethello" authbind Method.GET to { Response(OK).body("Secret Hello!") },
             "/internal/token" authbind Method.GET to {
                 val token = tokenValidator.firstValidToken(it)!!
