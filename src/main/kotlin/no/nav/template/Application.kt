@@ -3,6 +3,7 @@
 package no.nav.template
 
 import mu.KotlinLogging
+import mu.withLoggingContext
 import no.nav.security.token.support.core.jwt.JwtToken
 import no.nav.template.token.DefaultTokenValidator
 import no.nav.template.token.TokenExchangeHandler
@@ -45,7 +46,11 @@ class Application(
             "/internal/metrics" bind Method.GET to Metrics.metricsHttpHandler,
             "/internal/hello" bind Method.GET to {
                 log.info("Hello in the logs")
-                log.info(TEAM_LOGS, "Hello in the logs, TEAM LOGS")
+                withLoggingContext(
+                    "google_cloud_project" to "teamnks-dev-a4ad",
+                ) {
+                    log.info(TEAM_LOGS, "Hello in the logs, TEAM LOGS via context")
+                }
                 Response(OK).body("Hello!")
             },
             "/internal/secrethello" authbind Method.GET to { Response(OK).body("Secret Hello!") },
