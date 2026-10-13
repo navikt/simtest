@@ -1,15 +1,19 @@
 package no.nav.template
 
 import no.nav.security.token.support.core.jwt.JwtToken
+import no.nav.template.token.AzureOboExchange
 import no.nav.template.token.TokenValidator
 import org.http4k.core.HttpHandler
 import org.http4k.core.Method
 import org.http4k.core.Request
+import org.http4k.core.Response
 import org.http4k.core.Status
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
+import java.net.URLDecoder
+import java.nio.charset.StandardCharsets
 import java.util.Base64
 
 class TokenExchangeSecurityTest {
@@ -69,7 +73,27 @@ class TokenExchangeSecurityTest {
         assertEquals("no-store", fixed.header("Cache-Control"))
         val named = api(nameRequest("dev-gcp:platforce:saas-proxy"))
         assertEquals(Status.OK, named.status)
-        assertEquals("dev-gcp:platforce:saas-proxy", audience)
+        assertEquals("dev-gcp.platforce.saas-proxy", audience)
+    }
+
+    @Test
+    fun `azure OBO sends dot-separated target as default scope`() {
+        val result = jwt("""{"sub":"result"}""")
+        var sentScope = ""
+        val exchanger =
+            AzureOboExchange(
+                client = { request ->
+                    val form = URLDecoder.decode(request.bodyString(), StandardCharsets.UTF_8)
+                    sentScope = form.split('&').single { it.startsWith("scope=") }.substringAfter('=')
+                    Response(Status.OK).body("""{"access_token":"${result.encodedToken}"}""")
+                },
+                endpoint = "https://login.example.test/token",
+                clientId = "client-id",
+                clientSecret = "test-secret",
+            )
+        val api = app(jwt("""{"NAVident":"A123456"}"""), exchange = { token, target -> exchanger.exchange(token, target) })
+        assertEquals(Status.OK, api(nameRequest("dev-gcp:platforce:saas-proxy")).status)
+        assertEquals("api://dev-gcp.platforce.saas-proxy/.default", sentScope)
     }
 
     @Test
@@ -81,6 +105,9 @@ class TokenExchangeSecurityTest {
             "dev-gcp:platforce:saas-proxy/.default",
             "dev-gcp:platforce:saas-proxy offline_access",
             "dev-gcp:platforce:saas-proxy\n",
+            "dev-gcp.platforce.saas-proxy",
+            "dev-gcp:a:b:c",
+            "dev-gcp:ns:app%2F",
             "dev-gcp::app",
         ).forEach {
             val response = api(nameRequest(it))

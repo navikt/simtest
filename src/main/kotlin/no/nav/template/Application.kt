@@ -75,7 +75,7 @@ class Application(
                         contentType != "text/plain" -> tokenResponse(Response(Status.BAD_REQUEST))
                         req.bodyString().length > 150 || !appNamePattern.matches(req.bodyString()) ->
                             tokenResponse(Response(Status.BAD_REQUEST).body("Ugyldig applikasjonsnavn."))
-                        else -> tokenExchangeRoute(req.bodyString())(req)
+                        else -> tokenExchangeRoute(req.bodyString().replace(':', '.'))(req)
                     }
                 },
                 "/internal/gui" bind static(ResourceLoader.Classpath("/gui")),
