@@ -53,6 +53,51 @@ dependencies {
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.11.4'
 }
 
+tasks.register('npmCi', Exec) {
+    workingDir projectDir
+    commandLine 'npm', 'ci', '--ignore-scripts'
+    inputs.file 'package.json'
+    inputs.file 'package-lock.json'
+    outputs.dir 'node_modules'
+}
+
+tasks.register('frontendBuild', Exec) {
+    dependsOn tasks.named('npmCi')
+    workingDir projectDir
+    commandLine 'npm', 'run', 'build'
+    inputs.files fileTree('src/main/resources/gui') {
+        include 'index.html', 'main.tsx', 'styles.css'
+    }
+    inputs.file 'package.json'
+    inputs.file 'package-lock.json'
+    inputs.file 'tsconfig.json'
+    inputs.file 'vite.config.ts'
+    outputs.dir layout.buildDirectory.dir('generated/gui')
+}
+
+tasks.register('frontendTest', Exec) {
+    dependsOn tasks.named('npmCi')
+    workingDir projectDir
+    commandLine 'npm', 'test'
+}
+
+tasks.named('test') {
+    dependsOn tasks.named('frontendTest')
+}
+
+processResources {
+    dependsOn tasks.named('frontendBuild')
+    eachFile { details ->
+        def legacyGuiRoot = file('src/main/resources/gui').canonicalPath + File.separator
+        if (details.file.canonicalPath.startsWith(legacyGuiRoot) && details.file.canonicalPath != legacyGuiRoot + 'ico.png') {
+            details.exclude()
+        }
+    }
+    from(layout.buildDirectory.dir('generated/gui')) {
+        into 'gui'
+    }
+}
+
 test {
     useJUnitPlatform()
     testLogging {

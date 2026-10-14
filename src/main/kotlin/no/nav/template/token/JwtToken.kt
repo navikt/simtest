@@ -1,0 +1,42 @@
+package no.nav.template.token
+
+import mu.KotlinLogging
+import no.nav.security.token.support.core.jwt.JwtToken
+
+const val CLAIM_NAV_IDENT = "NAVident"
+const val CLAIM_AZP_NAME = "azp_name"
+const val CLAIM_ROLES = "roles"
+const val CLAIM_ISS = "iss"
+
+private val log = KotlinLogging.logger { }
+
+fun JwtToken.isMachineToken(): Boolean {
+    val rolesClaim = this.jwtTokenClaims.get(CLAIM_ROLES)
+    if (rolesClaim != null && (rolesClaim is ArrayList<*>)) {
+        if (rolesClaim.map { it.toString() }.any { it == "access_as_application" }) {
+            log.info("Confirmed machine token")
+            return true
+        }
+    }
+    return false
+}
+
+private val dollyCallers =
+    setOf(
+        "dev-fss:dolly:testnav-dolly-proxy-nav",
+        "dev-fss:dolly:testnav-dolly-proxy-trygdeetaten",
+    )
+
+fun JwtToken.isDollyToken(): Boolean = getAzpName() in dollyCallers
+
+fun JwtToken.hasClaim(name: String) = this.jwtTokenClaims.get(name) != null
+
+fun JwtToken.getClaim(name: String) = this.jwtTokenClaims.get(name)?.toString() ?: ""
+
+fun JwtToken.isNavOBOToken(): Boolean = (this.jwtTokenClaims.get(CLAIM_NAV_IDENT) as? String)?.matches(Regex("[A-Z][0-9]{6}")) == true
+
+fun JwtToken.getAzpName() = this.getClaim(CLAIM_AZP_NAME)
+
+fun JwtToken.getNAVIdent() = this.getClaim(CLAIM_NAV_IDENT)
+
+fun JwtToken.getIssuer() = this.getClaim(CLAIM_ISS)

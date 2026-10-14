@@ -1,28 +1,13 @@
-<!DOCTYPE html>
-<html>
+<!doctype html>
+<html lang="no" class="dark">
 <head>
-    <title>Henvendelse table examine</title>
-    <link rel="shortcut icon" type="image/x-icon" href="/internal/gui/ico.png">
+    <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
-    <meta http-equiv="Pragma" content="no-cache" />
-    <meta http-equiv="Expires" content="0" />
-    <link rel="stylesheet" href="/internal/gui/styles.css">
+    <title>Tokenveksling</title>
+    <link rel="icon" type="image/png" href="/internal/gui/ico.png">
 </head>
 <body>
-<div id="info-container">
-    <div id="name-info"></div>
-    <div id="expire-info"></div>
-    <div id="logout-button-holder"></div>
-</div>
-
-<div id="authorization-message"></div>
-
-<div id="table-container">
-    <!-- Records will be loaded here dynamically -->
-</div>
-
-<script src="/internal/gui/scripts.js"></script>
-
+    <div id="root"></div>
+    <script type="module" src="/main.tsx"></script>
 </body>
 </html>
