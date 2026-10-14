@@ -6,6 +6,16 @@ node_modules/
 *.iml
 *.iws
 
+# Generert lokalt oppsett for agenter og sandbox
+.cplt.toml
+.nav-pilot/
+.github/.nav-pilot-state.json
+.github/agents/
+.github/hooks/
+.github/instructions/
+.github/prompts/
+.github/skills/
+
 # Mac
 .DS_Store
 
