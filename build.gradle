@@ -89,7 +89,7 @@ processResources {
     dependsOn tasks.named('frontendBuild')
     eachFile { details ->
         def legacyGuiRoot = file('src/main/resources/gui').canonicalPath + File.separator
-        if (details.file.canonicalPath.startsWith(legacyGuiRoot) && details.file.canonicalPath != legacyGuiRoot + 'ico.png') {
+        if (details.file.canonicalPath.startsWith(legacyGuiRoot) && details.file.canonicalPath != legacyGuiRoot + 'favicon.svg') {
             details.exclude()
         }
     }
