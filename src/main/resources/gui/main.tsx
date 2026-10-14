@@ -149,7 +149,7 @@ export function App() {
                         <VStack gap="space-12">
                             <Switch checked={theme === "light"} onChange={(event) => setTheme(event.target.checked ? "light" : "dark")}>Lyst tema</Switch>
                             <Heading level="1" size="large">Tokenveksling</Heading>
-                            <BodyLong>Hent et token for en app i dev, på vegne av deg selv.</BodyLong>
+                            <BodyLong>Hent et token for en app i dev, på vegne av deg selv via simtest.</BodyLong>
                         </VStack>
                     </header>
 
@@ -201,7 +201,7 @@ export function App() {
                             <Box as="section" aria-labelledby="result-heading" background="raised" borderColor="neutral-subtle" borderWidth="1" borderRadius="12" padding="space-24">
                                 <VStack gap="space-16" align="start">
                                     <Heading id="result-heading" level="2" size="small">Token</Heading>
-                                    <BodyShort>Tokenet gir tilgang på vegne av deg. Ikke del det. Slett det fra Postman og utklippstavlen etter bruk.</BodyShort>
+                                    <BodyShort>Tokenet gir tilgang på vegne av deg via appen simtest. Ikke del det. Slett det fra Postman etter bruk.</BodyShort>
                                     {token && (
                                         <>
                                             <Textarea className="token-value" label="Token for valgt app" value={token} readOnly minRows={4} />
