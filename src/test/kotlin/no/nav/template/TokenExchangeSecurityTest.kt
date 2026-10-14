@@ -43,6 +43,44 @@ class TokenExchangeSecurityTest {
         .body(name)
 
     @Test
+    fun `built React GUI and assets are served under the same prefix with security headers`() {
+        val api = app()
+        val page = api(Request(Method.GET, "/internal/gui/"))
+        assertEquals(Status.OK, page.status)
+        assertEquals(Status.OK, api(Request(Method.GET, "/internal/gui")).status)
+        assertTrue(page.bodyString().contains("id=\"root\""))
+        assertTrue(page.bodyString().contains("class=\"dark\""))
+        assertEquals("no-store", page.header("Cache-Control"))
+        assertEquals("nosniff", page.header("X-Content-Type-Options"))
+        val csp = page.header("Content-Security-Policy") ?: ""
+        assertTrue(csp.contains("script-src 'self'"))
+        assertTrue(csp.contains("font-src 'self' https://cdn.nav.no"))
+        assertFalse(csp.contains("unsafe-inline"))
+        assertFalse(csp.contains("unsafe-eval"))
+
+        val scriptPath =
+            Regex("/internal/gui/assets/[a-zA-Z0-9_-]+\\.js")
+                .find(page.bodyString())
+                ?.value ?: error("Missing hashed JS asset in built HTML")
+        val script = api(Request(Method.GET, scriptPath))
+        assertEquals(Status.OK, script.status)
+        assertEquals("no-store", script.header("Cache-Control"))
+        assertEquals(csp, script.header("Content-Security-Policy"))
+        assertEquals("nosniff", script.header("X-Content-Type-Options"))
+        assertTrue(script.header("Content-Type")?.contains("javascript") == true)
+        val stylesheetPath =
+            Regex("/internal/gui/assets/[a-zA-Z0-9_-]+\\.css")
+                .find(page.bodyString())
+                ?.value ?: error("Missing hashed CSS asset in built HTML")
+        val stylesheet = api(Request(Method.GET, stylesheetPath))
+        assertEquals(Status.OK, stylesheet.status)
+        assertEquals(csp, stylesheet.header("Content-Security-Policy"))
+        assertEquals("nosniff", stylesheet.header("X-Content-Type-Options"))
+        assertTrue(stylesheet.header("Content-Type")?.contains("css") == true)
+        assertEquals(Status.NOT_FOUND, api(Request(Method.GET, "/internal/gui/scripts.js")).status)
+    }
+
+    @Test
     fun `login status returns name from validated token without caching`() {
         val response = app(jwt("""{"name":"  Kari Nordmann  "}"""))(Request(Method.GET, "/internal/secrethello"))
         assertEquals(Status.OK, response.status)

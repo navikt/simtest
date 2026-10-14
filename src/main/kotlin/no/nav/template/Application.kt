@@ -100,9 +100,12 @@ class Application(
         return { request ->
             val response = handler(request)
             if (request.uri.path.startsWith("/internal/gui")) {
+                val csp =
+                    "default-src 'self'; script-src 'self'; style-src 'self'; font-src 'self' https://cdn.nav.no; " +
+                        "object-src 'none'; frame-ancestors 'none'; base-uri 'none'; form-action 'self'"
                 response
                     .header("Cache-Control", "no-store")
-                    .header("Content-Security-Policy", "default-src 'self'; frame-ancestors 'none'; base-uri 'none'; form-action 'self'")
+                    .header("Content-Security-Policy", csp)
                     .header("X-Content-Type-Options", "nosniff")
                     .header("Referrer-Policy", "no-referrer")
             } else {

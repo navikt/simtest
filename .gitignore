@@ -2,6 +2,7 @@
 .idea/
 .kotlin/
 build/
+node_modules/
 *.iml
 *.iws
 

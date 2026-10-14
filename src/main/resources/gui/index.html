@@ -1,47 +1,13 @@
-<!DOCTYPE html>
-<html lang="no">
+<!doctype html>
+<html lang="no" class="dark">
 <head>
     <meta charset="utf-8">
-    <title>Tokenveksling</title>
-    <link rel="shortcut icon" type="image/x-icon" href="/internal/gui/ico.png">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
-    <meta http-equiv="Pragma" content="no-cache" />
-    <meta http-equiv="Expires" content="0" />
-    <link rel="stylesheet" href="/internal/gui/styles.css">
+    <title>Tokenveksling</title>
+    <link rel="icon" type="image/png" href="/internal/gui/ico.png">
 </head>
 <body>
-<main class="page-shell">
-    <header class="page-header">
-        <h1>Tokenveksling</h1>
-        <p class="intro">Logg inn med Nav-brukeren din og hent et token for en app i dev.</p>
-    </header>
-
-    <section class="login-section" aria-labelledby="login-heading">
-        <h2 id="login-heading">Innlogging</h2>
-        <div id="authorization-message" role="status" aria-live="polite"></div>
-    </section>
-
-    <section class="exchange-card" aria-labelledby="exchange-heading">
-        <h2 id="exchange-heading">Appnavn</h2>
-        <label for="app-name">Entra-appnavn</label>
-        <input id="app-name" name="app-name" type="text" value="dev-gcp:platforce:saas-proxy" aria-describedby="app-name-help" autocomplete="off" spellcheck="false">
-        <p id="app-name-help" class="field-help">Skriv cluster:namespace:appnavn, for eksempel dev-gcp:platforce:saas-proxy. Tokenet får et scope med punktum mellom delene.</p>
-        <button type="button" id="exchange-name" disabled>Hent token</button>
-    </section>
-
-    <p class="security-note">Tokenet gir tilgang på vegne av deg. Ikke del det, og slett det fra Postman etter bruk.</p>
-
-    <section class="result-form" aria-labelledby="result-heading">
-        <h2 id="result-heading">Token</h2>
-        <label for="token-result">Vekslet token</label>
-        <textarea id="token-result" readonly autocomplete="off" hidden></textarea>
-        <button type="button" id="copy-token" hidden>Kopier token</button>
-        <p id="exchange-status" role="status"></p>
-    </section>
-</main>
-
-<script src="/internal/gui/scripts.js"></script>
-
+    <div id="root"></div>
+    <script type="module" src="/main.tsx"></script>
 </body>
 </html>
