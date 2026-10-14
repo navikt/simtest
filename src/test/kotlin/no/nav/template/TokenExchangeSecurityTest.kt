@@ -43,6 +43,40 @@ class TokenExchangeSecurityTest {
         .body(name)
 
     @Test
+    fun `login status returns name from validated token without caching`() {
+        val response = app(jwt("""{"name":"  Kari Nordmann  "}"""))(Request(Method.GET, "/internal/secrethello"))
+        assertEquals(Status.OK, response.status)
+        assertEquals("Kari Nordmann", response.bodyString())
+        assertEquals("no-store", response.header("Cache-Control"))
+        assertEquals("no-cache", response.header("Pragma"))
+        assertEquals("text/plain; charset=utf-8", response.header("Content-Type"))
+        assertEquals("nosniff", response.header("X-Content-Type-Options"))
+    }
+
+    @Test
+    fun `login status hides name when unauthenticated and falls back for missing or invalid claim`() {
+        val request = Request(Method.GET, "/internal/secrethello")
+        val unauthenticated = app()(request)
+        assertEquals(Status.UNAUTHORIZED, unauthenticated.status)
+        assertEquals("no-store", unauthenticated.header("Cache-Control"))
+        listOf("{}", """{"name":null}""", """{"name":42}""", """{"name":["Kari"]}""", """{"name":"  \t  "}""").forEach {
+            assertEquals("Du", app(jwt(it))(request).bodyString())
+        }
+    }
+
+    @Test
+    fun `login status limits display name and serves HTML-looking text as plain text`() {
+        val request = Request(Method.GET, "/internal/secrethello")
+        val nameWithMarkup = "<img src=x onerror=alert(1)>"
+        val markup = app(jwt("""{"name":"$nameWithMarkup"}"""))(request)
+        assertEquals(nameWithMarkup, markup.bodyString())
+        assertEquals("text/plain; charset=utf-8", markup.header("Content-Type"))
+        val longName = "A".repeat(101)
+        assertEquals("A".repeat(100), app(jwt("""{"name":"$longName"}"""))(request).bodyString())
+        assertEquals("Kari Nordmann", app(jwt("""{"name":"Kari\n Nordmann"}"""))(request).bodyString())
+    }
+
+    @Test
     fun `both routes require validated user token`() {
         val api = app()
         listOf(Request(Method.GET, "/internal/tokenexchange2"), nameRequest("dev-gcp:platforce:saas-proxy")).forEach {
@@ -108,6 +142,7 @@ class TokenExchangeSecurityTest {
             "dev-gcp.platforce.saas-proxy",
             "dev-gcp:a:b:c",
             "dev-gcp:ns:app%2F",
+            "dev-gcp:platforce:${"a".repeat(136)}",
             "dev-gcp::app",
         ).forEach {
             val response = api(nameRequest(it))

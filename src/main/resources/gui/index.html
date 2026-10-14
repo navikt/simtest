@@ -14,34 +14,23 @@
 <main class="page-shell">
     <header class="page-header">
         <h1>Tokenveksling</h1>
-        <p class="intro">Logg inn med Nav-brukeren din og hent et token i dev. Kopier tokenet til Postman for å teste.</p>
+        <p class="intro">Logg inn med Nav-brukeren din og hent et token for en app i dev.</p>
     </header>
 
     <section class="login-section" aria-labelledby="login-heading">
         <h2 id="login-heading">Innlogging</h2>
-        <div id="authorization-message" aria-live="polite"></div>
+        <div id="authorization-message" role="status" aria-live="polite"></div>
     </section>
 
-    <section class="audience-flows" aria-labelledby="audiences-heading">
-        <h2 id="audiences-heading">Velg tokenmål</h2>
-        <div class="audience-grid">
-            <article class="audience-card">
-                <h3>Bekreftet audience</h3>
-                <p>Bruk den kjente app-ID-en for saas-proxy.</p>
-                <code>d4b4792b-3321-45ad-aa24-848a029f8450</code>
-                <button type="button" id="exchange-fixed" disabled>Hent token med app-ID</button>
-            </article>
-            <article class="audience-card">
-                <h3>Prøv Entra-appnavn</h3>
-                <label for="app-name">Appnavn (cluster:namespace:appnavn)</label>
-                <input id="app-name" name="app-name" type="text" value="dev-gcp:platforce:saas-proxy" aria-describedby="app-name-help" autocomplete="off" spellcheck="false">
-                <p id="app-name-help" class="field-help">Prøver scope api://&lt;appnavn&gt;/.default. Navnebasert scope er ikke bekreftet.</p>
-                <button type="button" id="exchange-name" disabled>Prøv tokenveksling med appnavn</button>
-            </article>
-        </div>
+    <section class="exchange-card" aria-labelledby="exchange-heading">
+        <h2 id="exchange-heading">Appnavn</h2>
+        <label for="app-name">Entra-appnavn</label>
+        <input id="app-name" name="app-name" type="text" value="dev-gcp:platforce:saas-proxy" aria-describedby="app-name-help" autocomplete="off" spellcheck="false">
+        <p id="app-name-help" class="field-help">Skriv cluster:namespace:appnavn, for eksempel dev-gcp:platforce:saas-proxy. Tokenet får et scope med punktum mellom delene.</p>
+        <button type="button" id="exchange-name" disabled>Hent token</button>
     </section>
 
-    <p class="security-note">Tokenet er en tilgangsnøkkel. Bruk kun testdata. Ikke del tokenet; fjern det fra Postman etter testing. Et utstedt token gir ikke automatisk tilgang til appen.</p>
+    <p class="security-note">Tokenet gir tilgang på vegne av deg. Ikke del det, og slett det fra Postman etter bruk.</p>
 
     <section class="result-form" aria-labelledby="result-heading">
         <h2 id="result-heading">Token</h2>

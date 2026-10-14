@@ -60,7 +60,23 @@ class Application(
                     }
                     Response(OK).body("Hello!")
                 },
-                "/internal/secrethello" authbind Method.GET to { Response(OK).body("Secret Hello!") },
+                "/internal/secrethello" authbind Method.GET to { request ->
+                    val token = tokenValidator.firstValidToken(request)
+                    val response =
+                        if (token == null) {
+                            Response(Status.UNAUTHORIZED)
+                        } else {
+                            val name =
+                                (token.jwtTokenClaims.get("name") as? String)
+                                    ?.trim()
+                                    ?.replace(Regex("\\p{Cntrl}"), "")
+                                    ?.take(100)
+                                    ?.takeIf { it.isNotBlank() }
+                                    ?: "Du"
+                            Response(OK).body(name)
+                        }
+                    tokenResponse(response)
+                },
                 "/internal/token" authbind Method.GET to {
                     val token = tokenValidator.firstValidToken(it)!!
                     Response(OK).header("Cache-Control", "no-store").body(token.encodedToken)
@@ -69,13 +85,14 @@ class Application(
                 "/internal/tokenexchange2" authbind Method.GET to tokenExchangeRoute("d4b4792b-3321-45ad-aa24-848a029f8450"),
                 "/internal/tokenexchange-name" authbind Method.POST to { req ->
                     val contentType = req.header("Content-Type")?.substringBefore(';')?.trim()
+                    val appName = req.bodyString()
                     when {
                         !isDev -> tokenResponse(Response(Status.NOT_FOUND))
                         !sameOrigin(req) -> tokenResponse(Response(Status.FORBIDDEN))
                         contentType != "text/plain" -> tokenResponse(Response(Status.BAD_REQUEST))
-                        req.bodyString().length > 150 || !appNamePattern.matches(req.bodyString()) ->
+                        !appNamePattern.matches(appName) ->
                             tokenResponse(Response(Status.BAD_REQUEST).body("Ugyldig applikasjonsnavn."))
-                        else -> tokenExchangeRoute(req.bodyString().replace(':', '.'))(req)
+                        else -> tokenExchangeRoute(appName.replace(':', '.'))(req)
                     }
                 },
                 "/internal/gui" bind static(ResourceLoader.Classpath("/gui")),

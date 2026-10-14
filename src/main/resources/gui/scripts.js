@@ -1,7 +1,6 @@
 const authorizationMessage = document.getElementById('authorization-message');
 const exchangeStatus = document.getElementById('exchange-status');
 const tokenResult = document.getElementById('token-result');
-const fixedButton = document.getElementById('exchange-fixed');
 const nameButton = document.getElementById('exchange-name');
 const appName = document.getElementById('app-name');
 const copyButton = document.getElementById('copy-token');
@@ -15,7 +14,6 @@ function clearToken() {
 }
 
 function setButtonsDisabled(disabled) {
-    fixedButton.disabled = disabled;
     nameButton.disabled = disabled;
 }
 
@@ -41,7 +39,8 @@ async function checkAuthorization() {
         if (response.status === 401) {
             showLogin('Du må logge inn med en Nav-bruker for å hente et token.');
         } else if (response.ok) {
-            authorizationMessage.textContent = 'Du er logget inn. Velg hvordan du vil hente et token.';
+            const name = (await response.text()).trim();
+            authorizationMessage.textContent = `${name || 'Du'} er logget inn i simtest.`;
             setButtonsDisabled(false);
         } else {
             authorizationMessage.textContent = 'Kunne ikke kontrollere innloggingen. Last siden på nytt.';
@@ -51,16 +50,16 @@ async function checkAuthorization() {
     }
 }
 
-async function exchange(useName) {
+async function exchange() {
     clearToken();
     const currentGeneration = generation;
     setButtonsDisabled(true);
     exchangeStatus.textContent = 'Henter token …';
     try {
-        const response = await fetch(useName ? '/internal/tokenexchange-name' : '/internal/tokenexchange2', {
-            method: useName ? 'POST' : 'GET',
-            headers: useName ? { 'Content-Type': 'text/plain' } : {},
-            body: useName ? appName.value : undefined,
+        const response = await fetch('/internal/tokenexchange-name', {
+            method: 'POST',
+            headers: { 'Content-Type': 'text/plain' },
+            body: appName.value,
             cache: 'no-store'
         });
         if (currentGeneration !== generation) return;
@@ -74,7 +73,7 @@ async function exchange(useName) {
             return;
         }
         if (response.status === 400) {
-            exchangeStatus.textContent = 'Ugyldig applikasjonsnavn. Bruk dev-gcp:team:appnavn.';
+            exchangeStatus.textContent = 'Ugyldig appnavn. Bruk dev-gcp:namespace:appnavn eller dev-fss:namespace:appnavn.';
             return;
         }
         if (!response.ok) {
@@ -90,7 +89,7 @@ async function exchange(useName) {
         tokenResult.value = token;
         tokenResult.hidden = false;
         copyButton.hidden = false;
-        exchangeStatus.textContent = 'Tokenet er klart. Et utstedt token gir ikke automatisk tilgang til appen.';
+        exchangeStatus.textContent = 'Tokenet er klart.';
     } catch (_) {
         if (currentGeneration === generation) {
             exchangeStatus.textContent = 'Kunne ikke hente token. Prøv igjen senere.';
@@ -102,8 +101,7 @@ async function exchange(useName) {
     }
 }
 
-fixedButton.addEventListener('click', () => exchange(false));
-nameButton.addEventListener('click', () => exchange(true));
+nameButton.addEventListener('click', exchange);
 appName.addEventListener('input', () => {
     clearToken();
     exchangeStatus.textContent = '';
