@@ -87,12 +87,25 @@ class Application(
                     val contentType = req.header("Content-Type")?.substringBefore(';')?.trim()
                     val appName = req.bodyString()
                     when {
-                        !isDev -> tokenResponse(Response(Status.NOT_FOUND))
-                        !sameOrigin(req) -> tokenResponse(Response(Status.FORBIDDEN))
-                        contentType != "text/plain" -> tokenResponse(Response(Status.BAD_REQUEST))
-                        !appNamePattern.matches(appName) ->
+                        !isDev -> {
+                            tokenResponse(Response(Status.NOT_FOUND))
+                        }
+
+                        !sameOrigin(req) -> {
+                            tokenResponse(Response(Status.FORBIDDEN))
+                        }
+
+                        contentType != "text/plain" -> {
+                            tokenResponse(Response(Status.BAD_REQUEST))
+                        }
+
+                        !appNamePattern.matches(appName) -> {
                             tokenResponse(Response(Status.BAD_REQUEST).body("Ugyldig applikasjonsnavn."))
-                        else -> tokenExchangeRoute(appName.replace(':', '.'))(req)
+                        }
+
+                        else -> {
+                            tokenExchangeRoute(appName.replace(':', '.'))(req)
+                        }
                     }
                 },
                 "/internal/gui" bind static(ResourceLoader.Classpath("/gui")),
@@ -143,10 +156,15 @@ class Application(
             val token = tokenValidator.firstValidToken(request)
             val response =
                 when {
-                    token == null -> Response(Status.UNAUTHORIZED)
-                    !token.isNavOBOToken() ->
+                    token == null -> {
+                        Response(Status.UNAUTHORIZED)
+                    }
+
+                    !token.isNavOBOToken() -> {
                         Response(Status.FORBIDDEN).body("Innloggingen mangler gyldig brukeridentitet. Logg inn med en Nav-bruker.")
-                    else ->
+                    }
+
+                    else -> {
                         try {
                             Response(OK).body(exchangeToken(token, audience).encodedToken)
                         } catch (_: MissingUserIdentityException) {
@@ -154,6 +172,7 @@ class Application(
                         } catch (_: Exception) {
                             Response(Status.BAD_GATEWAY).body("Kunne ikke hente token. Prøv igjen senere.")
                         }
+                    }
                 }
             tokenResponse(response)
         }
